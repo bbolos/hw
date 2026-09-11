@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "list.h"
+
+// Function to create a new node
+Node* createNode(int data) {
+    Node* newNode = (Node*) malloc (sizeof(Node));
+    if (newNode == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to insert a node at the end
+void insertEnd(Node** head, int data) {
+    Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+        return;
+    }
+    Node* current = *head;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    current->next = newNode;
+}
+
+// Function to print the linked list
+void printList(Node* head) {
+    Node* current = head;
+    while (current != NULL) {
+        printf("%d -> ", current->data);
+        current = current->next;
+    }
+    printf("NULL\n");
+}
+
+// Function to free the linked list
+void freeList(Node* head) {
+    Node* current = head;
+    while (current != NULL) {
+        Node* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
+
+// Implement the following to functions:
+// -------------------------------------
+// Dump the elements of the list pointed to by 'head' in the array 'resultBuff', but at most 'maxElems' elements. Return the number of
+// elements copied to the buffer (i.e., min of length of list and 'maxElems'). You can assume that the buffer has space for at least
+// that many elements. However, if resultBuff is NULL, terminate and return (-1)
+int dumpList (Node* head, int *resultBuff, int maxElems) {
+    //als resultbuff null is return -1
+    if (resultBuff == NULL){
+        return (-1);
+    }
+
+    //tel elementen en vul buffer
+    Node* current = head;
+    int count = 0;
+
+    while(current != NULL && count < maxElems){
+        resultBuff[count] = current -> data;
+        count++;
+        current = current -> next;
+    }
+
+    return count;
+}
+
+// Reverse the order of the elements of the list by adjusting the pointers in the nodes, and setting *head to the new head.
+// Do not alter the data in the nodes, or create new nodes. If 'head' is NULL, return. 
+void reverseList (Node** head) {
+    
+    //wanneer er niks is return
+    if (head == NULL){
+        return;
+    }
+
+    Node* prev = NULL;
+    Node* current = *head;
+    Node* next = NULL;
+
+    while (current != NULL){
+        next = current -> next;
+    Node* prev = NULL;
+
+    Node* prev = NULL;
+
+    Node* prev = NULL;
+        prev = current;
+        current = current -> next;
+    }
+}
