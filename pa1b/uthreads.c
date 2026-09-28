@@ -123,9 +123,6 @@ void uthread_exit(){
     if (next) {
         current_thread = next;
         setcontext(&next->context);
-    } else if (current_thread != &main_thread) {
-        current_thread = &main_thread;
-        setcontext(&main_thread.context);
     }
 }
 
