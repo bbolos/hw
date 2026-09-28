@@ -145,7 +145,7 @@ void uthread_cleanup(bool force){
     }
     //reset state vars
     queue_head = queue_tail = NULL;
-    current_thread = NULL;
+    current_thread = &main_thread;
     initialized = false;
 }
 
