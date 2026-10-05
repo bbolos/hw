@@ -46,6 +46,10 @@ void *suballocator_malloc(u_int32_t n){
     return;
 }
 
+void suballocator_free(void *p){
+    return;
+}
+
 void suballocator_exit(void){
     //reset when not empty
     if(memory != NULL){
