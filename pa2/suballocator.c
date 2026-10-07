@@ -18,9 +18,14 @@ typedef struct Header{
 #define HEADER_SIZE sizeof(Header)
 static Header *free_list_ptr = NULL;
 
+//magic constants
+#define FREE_MAGIC 0xDEADBEEF
+#define ALLOC_MAGIC 0xDEAFBEAD
+
+//Suballocator functies
 void suballocator_init(){
     //not empty return
-    if(memory != null){
+    if(memory != NULL){
         return;
     }
 
@@ -43,7 +48,66 @@ void suballocator_init(){
 }
 
 void *suballocator_malloc(u_int32_t n){
-    return;
+    if (free_list_ptr == NULL){
+        return NULL;
+    }
+
+    u_int32_t size = n + HEADER_SIZE;
+    Header *curr = free_list_ptr;
+    Header *found = NULL;
+
+    //zoek naar plek met genoeg ruimte
+    do{
+        if(curr -> magic != FREE_MAGIC){
+            fprintf(stderr, "Memory corruption\n");
+            abort();
+        }
+
+        if(curr -> size >= size){
+            found = curr;
+            break;
+        }
+
+        curr = curr -> next;
+    } while(curr != free_list_ptr);
+
+    if(found == NULL){
+        return NULL;
+    }
+
+    //blok halveren tot het nietmeer kleiner kan
+    while((found -> size) / 2 >= size){
+        u_int32_t half_size = (chosen -> size) / 2;
+        chosen -> size = half_size;
+
+        //maak nieuwe helft
+        Header *next = (Header *)((byte *)found + half_size);
+        next -> magic = FREE_MAGIC;
+        next -> size = half_size;
+
+        //voeg nieuwe helft toe
+        next -> next = found -> next;
+        next -> prev = found;
+        found -> next -> prev = next;
+        found -> next = next;
+    }
+
+    //invariant controleren
+    if((found -> next) == found){
+        return NULL;
+    }
+
+    //verwijder uit free list
+    found -> prev -> next = found -> next;
+    found -> next -> prev = found -> prev;
+
+    if(free_list_ptr == found){
+        free_list_ptr = found -> next
+    }
+
+    found -> magic = ALLOC_MAGIC;
+
+    return (void *)((byte *)found + HEADER_SIZE);
 }
 
 void suballocator_free(void *p){
