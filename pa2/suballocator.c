@@ -111,7 +111,42 @@ void *suballocator_malloc(u_int32_t n){
 }
 
 void suballocator_free(void *p){
-    return;
+    if (p == NULL){
+	return;
+    }
+    //pak juiste header en maak vrij
+    Header *h = (Header*)((byte*)p - HEADER_SIZE);
+    if(h -> magic != ALLOC_MAGIC){
+	fprintf(stderr, "Invalid free");
+	abort();
+    }
+    h -> magic = FREE_MAGIC;
+
+    //zoek plek in free_lijst
+    Header *curr = free_list_ptr;
+    if(curr != NULL){
+	do{
+	    if(curr -> magic != FREE_MAGIC){
+	    	fprintf(stderr, "Invalid free");
+		abort();
+	    }
+
+	    //stop wanneer er tussen past of kleiner dan begin of groter dan einde
+            if (curr < curr -> next && curr < h && h < curr -> next) {
+                break;
+            }
+            if (curr >= curr -> next && (h > curr || h < curr -> next)) {
+                break;
+            }
+	    curr = curr->next;
+	} while (curr != free_list_ptr);
+    }
+
+    //toevoegen
+    h -> next = curr -> next;
+    h -> prev = curr;
+    curr -> next -> prev = h;
+    curr -> next = h;
 }
 
 void suballocator_exit(void){
