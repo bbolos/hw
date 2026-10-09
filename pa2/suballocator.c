@@ -52,7 +52,7 @@ void *suballocator_malloc(u_int32_t n){
         return NULL;
     }
 
-    u_int32_t size = n + HEADER_SIZE;
+    uint32_t size = n + HEADER_SIZE;
     Header *curr = free_list_ptr;
     Header *found = NULL;
 
@@ -77,7 +77,7 @@ void *suballocator_malloc(u_int32_t n){
 
     //blok halveren tot het nietmeer kleiner kan
     while((found -> size) / 2 >= size){
-        u_int32_t half_size = (chosen -> size) / 2;
+        uint32_t half_size = (chosen -> size) / 2;
         chosen -> size = half_size;
 
         //maak nieuwe helft
@@ -125,28 +125,47 @@ void suballocator_free(void *p){
     //zoek plek in free_lijst
     Header *curr = free_list_ptr;
     if(curr != NULL){
-	do{
-	    if(curr -> magic != FREE_MAGIC){
-	    	fprintf(stderr, "Invalid free");
-		abort();
-	    }
+		do{
+		    if(curr -> magic != FREE_MAGIC){
+		    	fprintf(stderr, "Invalid free");
+				abort();
+		    }
 
-	    //stop wanneer er tussen past of kleiner dan begin of groter dan einde
+		    //stop wanneer er tussen past of kleiner dan begin of groter dan einde
             if (curr < curr -> next && curr < h && h < curr -> next) {
                 break;
             }
             if (curr >= curr -> next && (h > curr || h < curr -> next)) {
                 break;
             }
-	    curr = curr->next;
-	} while (curr != free_list_ptr);
-    }
-
+		    curr = curr->next;
+		} while (curr != free_list_ptr);
+	}
     //toevoegen
     h -> next = curr -> next;
     h -> prev = curr;
     curr -> next -> prev = h;
     curr -> next = h;
+
+	//samenvoegen
+	while(h -> size < 1048576){
+		uintptr_t diff = (byte *) h - memory;
+		Header *bud = (Header *)(memory + (diff ^ h -> size))
+		if(bud -> magic != FREE_MAGIC || bud -> size != h -> size){
+			break;
+		}
+
+		//welke wordt startblok, verwijder de ander en voeg samen
+		Header *een = (bud < h) ? bud : h;
+		Header *twee = (bud < h) ? h : bud;
+
+		if(free_list_ptr == twee){
+			free_list_ptr = een;
+		}
+
+		een -> size *= 2;
+		h = een;
+	}
 }
 
 void suballocator_exit(void){
