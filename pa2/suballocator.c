@@ -1,8 +1,10 @@
+#define _GNU_SOURCE
 #include "suballocator.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/mman.h>
+#include <sys/types.h>
 
 typedef unsigned char byte;
 static byte * memory = NULL;
@@ -38,7 +40,7 @@ void suballocator_init(){
     }
 
     //init header and set free_list_ptr
-    Header h = (Header *) memory;
+    Header *h = (Header *) memory;
     h -> magic = 0xDEADBEEF;
     h -> size = 1048576;
     h -> next = h;
@@ -52,7 +54,7 @@ void *suballocator_malloc(u_int32_t n){
         return NULL;
     }
 
-    uint32_t size = n + HEADER_SIZE;
+    u_int32_t size = n + HEADER_SIZE;
     Header *curr = free_list_ptr;
     Header *found = NULL;
 
@@ -77,8 +79,8 @@ void *suballocator_malloc(u_int32_t n){
 
     //blok halveren tot het nietmeer kleiner kan
     while((found -> size) / 2 >= size){
-        uint32_t half_size = (chosen -> size) / 2;
-        chosen -> size = half_size;
+        u_int32_t half_size = (found -> size) / 2;
+        found -> size = half_size;
 
         //maak nieuwe helft
         Header *next = (Header *)((byte *)found + half_size);
@@ -102,7 +104,7 @@ void *suballocator_malloc(u_int32_t n){
     found -> next -> prev = found -> prev;
 
     if(free_list_ptr == found){
-        free_list_ptr = found -> next
+        free_list_ptr = found -> next;
     }
 
     found -> magic = ALLOC_MAGIC;
@@ -149,8 +151,8 @@ void suballocator_free(void *p){
 
 	//samenvoegen
 	while(h -> size < 1048576){
-		uintptr_t diff = (byte *) h - memory;
-		Header *bud = (Header *)(memory + (diff ^ h -> size))
+		u_int32_t diff = (byte *) h - memory;
+		Header *bud = (Header *)(memory + (diff ^ h -> size));
 		if(bud -> magic != FREE_MAGIC || bud -> size != h -> size){
 			break;
 		}
