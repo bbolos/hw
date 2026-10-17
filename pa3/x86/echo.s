@@ -15,9 +15,8 @@ _start:
     movl    8(%esp), %edi
 
     #lengte van argv[1]
-    movl    %edi, %ecx
-    xorl    %al, %al
-    orl     $-1, %ecx
+    movb    $0, %al
+    movl    $-1, %ecx
     repne   scasb
     notl    %ecx
     decl    %ecx
