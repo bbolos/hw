@@ -1,10 +1,14 @@
 1. What is the value, in hex, of the ecx register when the function f is called for the first time?
+0x7fffffea, i used the following commands in gdb: break f -> run -> i r ecx
 
 2. Which register stores the value of the variable i in the function main (before f is called)?
+eax,
 
 3. What is the address, in hex, of the function f?
+0x08049cf5
 
 4. What is the name of the 6th instruction of the function f?
+add
 
 5. When f completes after being called from main, to which address in main does control return? Write your answer in hex form.
-
+0x08049d91
